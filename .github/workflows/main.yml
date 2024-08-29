@@ -29,7 +29,7 @@ jobs:
         with:
           path: /tmp/cache-path
           key: cache-path-${{ github.run_id }}
-          enableCrossOsArchive: 'true'
+          enableCrossOsArchive: true
   read-cache:
     name: Read Cache
     needs: create-cache
@@ -46,8 +46,8 @@ jobs:
         with:
           path: /tmp/cache-path
           key: cache-path-${{ github.run_id }}
-          enableCrossOsArchive: 'true'
-          fail-on-cache-miss: 'true'
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
 
       - run: |
           mv /tmp/cache-path cache-path
