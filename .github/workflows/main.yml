@@ -1,0 +1,53 @@
+name: Cache Issue Testing
+on:
+  push:
+    branches:
+      - '**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+jobs:
+  create-cache:
+    name: Setup Cache
+    runs-on: ubuntu-latest
+    steps:
+      - run: | 
+          echo ~
+          echo $PWD
+      # Trying to use /tmp to avoid issues with absolute paths, but still seems to be failing.
+      - name: Create files
+        run: |
+          mkdir -p /tmp/cache-path/
+          echo "test" > /tmp/cache-path/file.txt
+
+      - name: Cache Files
+        uses: actions/cache/save@v4
+        with:
+          path: /tmp/cache-path
+          key: cache-path-${{ github.run_id }}
+          enableCrossOsArchive: 'true'
+  read-cache:
+    name: Read Cache
+    needs: create-cache
+    runs-on: ubuntu-latest
+    container:
+      image: rockylinux:9
+      options: -u root
+    steps:
+      - run: |
+          echo ~
+          echo $PWD
+      - name: Get Cached Files
+        uses: actions/cache/restore@v4
+        with:
+          path: /tmp/cache-path
+          key: cache-path-${{ github.run_id }}
+          enableCrossOsArchive: 'true'
+          fail-on-cache-miss: 'true'
+
+      - run: |
+          mv /tmp/cache-path cache-path
